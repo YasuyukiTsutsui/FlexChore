@@ -12,7 +12,7 @@ import SwiftData
 struct FlexChoreApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            ChoreItem.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -25,7 +25,7 @@ struct FlexChoreApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ChoreListView()
         }
         .modelContainer(sharedModelContainer)
     }

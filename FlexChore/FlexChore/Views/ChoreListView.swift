@@ -14,8 +14,8 @@ struct ChoreListView: View {
     @Query(sort: \ChoreItem.nextDueDate) private var chores: [ChoreItem]
 
     @State private var showingAddSheet = false
-
-    private let scheduler = ChoreScheduler()
+    @State private var selectedChore: ChoreItem?
+    @State private var viewModel = ChoreListViewModel()
 
     var body: some View {
         NavigationStack {
@@ -39,6 +39,12 @@ struct ChoreListView: View {
             .sheet(isPresented: $showingAddSheet) {
                 AddChoreView()
             }
+            .sheet(item: $selectedChore) { chore in
+                EditChoreView(chore: chore)
+            }
+            .onAppear {
+                viewModel.setModelContext(modelContext)
+            }
         }
     }
 
@@ -58,9 +64,7 @@ struct ChoreListView: View {
             if !overdueChores.isEmpty {
                 Section {
                     ForEach(overdueChores) { chore in
-                        ChoreRowView(chore: chore, onComplete: {
-                            completeChore(chore)
-                        })
+                        choreRow(for: chore)
                     }
                     .onDelete { indexSet in
                         deleteChores(from: overdueChores, at: indexSet)
@@ -75,9 +79,7 @@ struct ChoreListView: View {
             if !todayChores.isEmpty {
                 Section {
                     ForEach(todayChores) { chore in
-                        ChoreRowView(chore: chore, onComplete: {
-                            completeChore(chore)
-                        })
+                        choreRow(for: chore)
                     }
                     .onDelete { indexSet in
                         deleteChores(from: todayChores, at: indexSet)
@@ -92,9 +94,7 @@ struct ChoreListView: View {
             if !upcomingChores.isEmpty {
                 Section {
                     ForEach(upcomingChores) { chore in
-                        ChoreRowView(chore: chore, onComplete: {
-                            completeChore(chore)
-                        })
+                        choreRow(for: chore)
                     }
                     .onDelete { indexSet in
                         deleteChores(from: upcomingChores, at: indexSet)
@@ -103,6 +103,16 @@ struct ChoreListView: View {
                     Label("今後の予定", systemImage: "calendar")
                 }
             }
+        }
+    }
+
+    private func choreRow(for chore: ChoreItem) -> some View {
+        ChoreRowView(chore: chore, onComplete: {
+            completeChore(chore)
+        })
+        .contentShape(Rectangle())
+        .onTapGesture {
+            selectedChore = chore
         }
     }
 
@@ -124,16 +134,13 @@ struct ChoreListView: View {
 
     private func completeChore(_ chore: ChoreItem) {
         withAnimation {
-            scheduler.markAsCompleted(chore)
+            viewModel.completeChore(chore)
         }
     }
 
     private func deleteChores(from source: [ChoreItem], at offsets: IndexSet) {
         withAnimation {
-            for index in offsets {
-                let chore = source[index]
-                modelContext.delete(chore)
-            }
+            viewModel.deleteChores(from: source, at: offsets)
         }
     }
 }

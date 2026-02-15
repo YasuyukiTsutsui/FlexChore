@@ -27,7 +27,7 @@ struct FlexChoreApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ChoreListView()
+            MainTabView()
                 .task {
                     await initializeApp()
                 }

@@ -32,6 +32,9 @@ final class ChoreItem {
     /// 更新日時
     var updatedAt: Date
 
+    /// 通知などで使用する安定した識別子
+    var stableIdentifier: String
+
     /// 初期化
     /// - Parameters:
     ///   - name: 家事の名称
@@ -48,6 +51,7 @@ final class ChoreItem {
         self.nextDueDate = nextDueDate ?? Calendar.current.startOfDay(for: Date())
         self.createdAt = Date()
         self.updatedAt = Date()
+        self.stableIdentifier = UUID().uuidString
     }
 
     // MARK: - Computed Properties

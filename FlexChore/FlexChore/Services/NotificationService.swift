@@ -61,7 +61,7 @@ final class NotificationService {
         content.body = "\(chore.name)の予定日です"
         content.sound = .default
         content.categoryIdentifier = "CHORE_REMINDER"
-        content.userInfo = ["choreId": chore.id.uuidString]
+        content.userInfo = ["choreId": chore.stableIdentifier]
 
         // トリガーを作成（予定日の指定時刻）
         var dateComponents = Calendar.current.dateComponents(
@@ -113,7 +113,7 @@ final class NotificationService {
 
     /// 家事固有の通知IDを生成
     private func notificationId(for chore: ChoreItem) -> String {
-        "chore_reminder_\(chore.id.uuidString)"
+        "chore_reminder_\(chore.stableIdentifier)"
     }
 
     // MARK: - Pending Notifications

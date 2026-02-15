@@ -68,7 +68,9 @@ struct AddChoreView: View {
                 }
             }
             .navigationTitle("家事を追加")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {

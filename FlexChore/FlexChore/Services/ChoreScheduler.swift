@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import os
 
 /// 家事スケジュールの日付計算を担当するサービス
 /// - 完了時の次回予定日計算
@@ -13,6 +14,7 @@ import Foundation
 struct ChoreScheduler {
 
     private let calendar: Calendar
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "FlexChore", category: "ChoreScheduler")
 
     init(calendar: Calendar = .current) {
         self.calendar = calendar
@@ -49,7 +51,7 @@ struct ChoreScheduler {
     func calculateNextDueDate(from baseDate: Date, frequencyDays: Int) -> Date {
         let baseDay = calendar.startOfDay(for: baseDate)
         guard let nextDate = calendar.date(byAdding: .day, value: frequencyDays, to: baseDay) else {
-            // フォールバック: 計算に失敗した場合は基準日をそのまま返す
+            logger.warning("次回予定日の計算に失敗: baseDate=\(baseDay), frequencyDays=\(frequencyDays). 基準日をフォールバックとして使用")
             return baseDay
         }
         return nextDate
@@ -73,6 +75,7 @@ struct ChoreScheduler {
     ///   - days: ずらす日数（正: 後ろ倒し、負: 前倒し）
     func adjustDueDate(_ item: ChoreItem, byDays days: Int) {
         guard let newDate = calendar.date(byAdding: .day, value: days, to: item.nextDueDate) else {
+            logger.warning("予定日の調整に失敗: \(item.name), days=\(days)")
             return
         }
         item.nextDueDate = newDate

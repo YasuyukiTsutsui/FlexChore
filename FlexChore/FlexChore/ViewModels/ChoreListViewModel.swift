@@ -8,12 +8,14 @@
 import Foundation
 import SwiftData
 import Observation
+import os
 
 /// 家事一覧画面のViewModel
 @Observable
 final class ChoreListViewModel {
     private let scheduler: ChoreScheduler
     private let notificationService: NotificationService
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "FlexChore", category: "ChoreListViewModel")
     private var modelContext: ModelContext?
 
     init(
@@ -55,7 +57,11 @@ final class ChoreListViewModel {
 
         // 次回予定日の通知をスケジュール
         Task {
-            try? await notificationService.scheduleReminder(for: chore)
+            do {
+                try await notificationService.scheduleReminder(for: chore)
+            } catch {
+                logger.error("通知スケジュールに失敗 (\(chore.name)): \(error.localizedDescription)")
+            }
         }
     }
 
@@ -73,6 +79,7 @@ final class ChoreListViewModel {
     ///   - offsets: 削除するインデックス
     func deleteChores(from source: [ChoreItem], at offsets: IndexSet) {
         for index in offsets {
+            guard source.indices.contains(index) else { continue }
             let chore = source[index]
             notificationService.removeReminder(for: chore)
             modelContext?.delete(chore)
@@ -88,7 +95,11 @@ final class ChoreListViewModel {
 
         // 通知を更新
         Task {
-            try? await notificationService.scheduleReminder(for: chore)
+            do {
+                try await notificationService.scheduleReminder(for: chore)
+            } catch {
+                logger.error("通知スケジュールに失敗 (\(chore.name)): \(error.localizedDescription)")
+            }
         }
     }
 
@@ -101,7 +112,11 @@ final class ChoreListViewModel {
 
         // 通知を更新
         Task {
-            try? await notificationService.scheduleReminder(for: chore)
+            do {
+                try await notificationService.scheduleReminder(for: chore)
+            } catch {
+                logger.error("通知スケジュールに失敗 (\(chore.name)): \(error.localizedDescription)")
+            }
         }
     }
 

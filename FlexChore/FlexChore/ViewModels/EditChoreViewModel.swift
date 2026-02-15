@@ -7,6 +7,7 @@
 
 import Foundation
 import Observation
+import os
 
 /// 家事編集画面のViewModel
 @Observable
@@ -15,6 +16,7 @@ final class EditChoreViewModel {
 
     private let scheduler: ChoreScheduler
     private let notificationService: NotificationService
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "FlexChore", category: "EditChoreViewModel")
 
     // MARK: - Original State (for comparison)
 
@@ -116,7 +118,11 @@ final class EditChoreViewModel {
             scheduler.reschedule(originalChore, to: nextDueDate)
 
             // 通知も更新
-            try? await notificationService.scheduleReminder(for: originalChore)
+            do {
+                try await notificationService.scheduleReminder(for: originalChore)
+            } catch {
+                logger.error("通知スケジュールに失敗 (\(self.originalChore.name)): \(error.localizedDescription)")
+            }
         }
 
         originalChore.updatedAt = Date()

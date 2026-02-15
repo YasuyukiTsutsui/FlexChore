@@ -7,6 +7,7 @@
 
 import Foundation
 import UserNotifications
+import os
 
 /// 家事リマインダー通知を管理するサービス
 final class NotificationService {
@@ -14,6 +15,7 @@ final class NotificationService {
     static let shared = NotificationService()
 
     private let notificationCenter = UNUserNotificationCenter.current()
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "FlexChore", category: "NotificationService")
 
     private init() {}
 
@@ -29,7 +31,7 @@ final class NotificationService {
             )
             return granted
         } catch {
-            print("通知の許可リクエストに失敗: \(error)")
+            logger.error("通知の許可リクエストに失敗: \(error.localizedDescription)")
             return false
         }
     }
@@ -105,7 +107,11 @@ final class NotificationService {
         let upcomingChores = chores.filter { $0.nextDueDate >= today }
 
         for chore in upcomingChores {
-            try? await scheduleReminder(for: chore)
+            do {
+                try await scheduleReminder(for: chore)
+            } catch {
+                logger.error("通知の再スケジュールに失敗 (\(chore.name)): \(error.localizedDescription)")
+            }
         }
     }
 

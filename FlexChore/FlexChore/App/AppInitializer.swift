@@ -7,12 +7,14 @@
 
 import Foundation
 import SwiftData
+import os
 
 /// アプリ起動時の初期化処理を担当
 final class AppInitializer {
 
     private let notificationService: NotificationService
     private let modelContainer: ModelContainer
+    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "FlexChore", category: "AppInitializer")
 
     init(
         notificationService: NotificationService = .shared,
@@ -66,7 +68,7 @@ final class AppInitializer {
             let chores = try context.fetch(descriptor)
             await notificationService.rescheduleAllReminders(for: chores)
         } catch {
-            print("家事データの取得に失敗: \(error)")
+            logger.error("家事データの取得に失敗: \(error.localizedDescription)")
         }
     }
 
@@ -93,7 +95,7 @@ final class AppInitializer {
                 }
             }
         } catch {
-            print("データ整合性チェックに失敗: \(error)")
+            logger.error("データ整合性チェックに失敗: \(error.localizedDescription)")
         }
     }
 }

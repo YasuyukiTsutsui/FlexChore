@@ -24,7 +24,7 @@ struct CalendarView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // 月のナビゲーション
+                // 月のナビゲーション（ミントヘッダー）
                 monthNavigationHeader
 
                 // 曜日ヘッダー
@@ -38,9 +38,15 @@ struct CalendarView: View {
                 // 選択日の家事一覧
                 selectedDateChoreList
             }
+            .background(AppTheme.backgroundMint)
             .navigationTitle("カレンダー")
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
+            #if os(iOS)
+            .toolbarBackground(AppTheme.primaryMint, for: .navigationBar)
+            .toolbarBackground(.visible, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
             #endif
             .sheet(item: $selectedChore) { chore in
                 EditChoreView(chore: chore)
@@ -60,6 +66,7 @@ struct CalendarView: View {
             } label: {
                 Image(systemName: "chevron.left")
                     .font(.title3)
+                    .foregroundStyle(AppTheme.accentTeal)
             }
 
             Spacer()
@@ -75,6 +82,7 @@ struct CalendarView: View {
             } label: {
                 Image(systemName: "chevron.right")
                     .font(.title3)
+                    .foregroundStyle(AppTheme.accentTeal)
             }
         }
         .padding()
@@ -107,13 +115,13 @@ struct CalendarView: View {
     private var calendarGrid: some View {
         let days = daysInMonth()
 
-        return LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 8) {
+        return LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 7), spacing: 4) {
             ForEach(days, id: \.self) { date in
                 if let date = date {
                     dayCell(for: date)
                 } else {
                     Color.clear
-                        .aspectRatio(1, contentMode: .fit)
+                        .frame(height: 64)
                 }
             }
         }
@@ -136,30 +144,37 @@ struct CalendarView: View {
                     .frame(width: 28, height: 28)
                     .background {
                         if isToday {
-                            Circle().fill(Color.blue)
+                            Circle().fill(AppTheme.primaryMint)
                         } else if isSelected {
-                            Circle().stroke(Color.blue, lineWidth: 2)
+                            Circle().stroke(AppTheme.primaryMint, lineWidth: 2)
                         }
                     }
 
-                // 家事インジケーター
-                HStack(spacing: 2) {
-                    ForEach(choresOnDay.prefix(3)) { chore in
-                        Circle()
-                            .fill(choreColor(for: chore, on: date))
-                            .frame(width: 6, height: 6)
-                    }
-                    if choresOnDay.count > 3 {
-                        Text("+")
+                // 家事名バッジ
+                VStack(spacing: 1) {
+                    ForEach(choresOnDay.prefix(2)) { chore in
+                        Text(chore.name)
                             .font(.system(size: 8))
+                            .lineLimit(1)
+                            .padding(.horizontal, 2)
+                            .padding(.vertical, 1)
+                            .frame(maxWidth: .infinity)
+                            .background(
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(choreColor(for: chore, on: date).opacity(0.3))
+                            )
+                    }
+                    if choresOnDay.count > 2 {
+                        Text("+\(choresOnDay.count - 2)")
+                            .font(.system(size: 7))
                             .foregroundStyle(.secondary)
                     }
                 }
-                .frame(height: 8)
+                .frame(height: 24)
             }
         }
         .buttonStyle(.plain)
-        .aspectRatio(1, contentMode: .fit)
+        .frame(height: 64)
     }
 
     // MARK: - Selected Date Chore List
@@ -226,13 +241,11 @@ struct CalendarView: View {
         let startOfCalendar = monthFirstWeek.start
         var days: [Date?] = []
 
-        // 6週間分（最大42日）のセルを生成
         for dayOffset in 0..<42 {
             guard let date = calendar.date(byAdding: .day, value: dayOffset, to: startOfCalendar) else {
                 continue
             }
 
-            // 現在の月に含まれる日付のみ表示
             if calendar.isDate(date, equalTo: currentMonth, toGranularity: .month) {
                 days.append(date)
             } else if days.isEmpty || days.last != nil {
@@ -240,7 +253,6 @@ struct CalendarView: View {
             }
         }
 
-        // 末尾のnilを削除
         while days.last == nil && !days.isEmpty {
             days.removeLast()
         }
@@ -257,11 +269,11 @@ struct CalendarView: View {
         let choreDate = calendar.startOfDay(for: date)
 
         if choreDate < today {
-            return .red
+            return Color(hex: "FF6B6B")
         } else if calendar.isDateInToday(date) {
-            return .orange
+            return AppTheme.primaryMint
         } else {
-            return .green
+            return Color(hex: "51CF66")
         }
     }
 

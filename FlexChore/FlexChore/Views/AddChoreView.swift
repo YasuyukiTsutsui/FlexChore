@@ -71,6 +71,7 @@ struct AddChoreView: View {
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
+            .tint(AppTheme.primaryMint)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {

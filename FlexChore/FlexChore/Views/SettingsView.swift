@@ -29,6 +29,7 @@ struct SettingsView: View {
                 aboutSection
             }
             .navigationTitle("設定")
+            .tint(AppTheme.primaryMint)
             .task {
                 await checkNotificationStatus()
             }
@@ -132,11 +133,11 @@ struct SettingsView: View {
     private var notificationStatusColor: Color {
         switch notificationStatus {
         case .authorized, .provisional, .ephemeral:
-            return .green
+            return AppTheme.primaryMint
         case .denied:
-            return .red
+            return Color(hex: "FF6B6B")
         case .notDetermined:
-            return .orange
+            return Color(hex: "FFB347")
         @unknown default:
             return .secondary
         }

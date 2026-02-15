@@ -7,95 +7,90 @@
 
 import SwiftUI
 
-/// 家事リストの各行を表示するView
+/// 家事カードコンポーネント
 struct ChoreRowView: View {
     let chore: ChoreItem
     let onComplete: () -> Void
+    let onPostpone: () -> Void
 
     var body: some View {
-        HStack {
+        HStack(spacing: 16) {
             // 完了ボタン
             Button {
                 onComplete()
             } label: {
-                Image(systemName: "circle")
-                    .font(.title2)
-                    .foregroundStyle(statusColor)
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 28))
+                    .foregroundStyle(AppTheme.accentTeal)
             }
             .buttonStyle(.plain)
 
             // 家事情報
             VStack(alignment: .leading, spacing: 4) {
                 Text(chore.name)
-                    .font(.body)
-                    .fontWeight(.medium)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                    .lineLimit(2)
 
-                HStack(spacing: 8) {
-                    // 頻度
-                    Label("\(chore.frequencyDays)日ごと", systemImage: "repeat")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    // ステータス
-                    Text(chore.statusDescription)
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundStyle(statusColor)
-                }
+                Text(chore.statusDescription)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
 
-            // 予定日
-            VStack(alignment: .trailing, spacing: 2) {
-                Text(chore.nextDueDate, format: .dateTime.month().day())
+            // +1日ボタン
+            Button {
+                onPostpone()
+            } label: {
+                Text("+1日")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
-
-                Text(weekdayString)
-                    .font(.caption2)
-                    .foregroundStyle(.tertiary)
+                    .fontWeight(.semibold)
+                    .foregroundStyle(AppTheme.accentTeal)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(AppTheme.accentTeal, lineWidth: 1.5)
+                    )
             }
+            .buttonStyle(.plain)
         }
-        .padding(.vertical, 4)
+        .padding(AppTheme.cardPadding)
+        .background(
+            RoundedRectangle(cornerRadius: AppTheme.cardCornerRadius)
+                .fill(cardBackgroundColor)
+        )
     }
 
-    // MARK: - Computed Properties
-
-    private var statusColor: Color {
+    private var cardBackgroundColor: Color {
         if chore.isOverdue {
-            return .red
+            return AppTheme.cardOverdue
         } else if chore.isDueToday {
-            return .orange
+            return AppTheme.cardToday
         } else {
-            return .green
+            return AppTheme.cardUpcoming
         }
-    }
-
-    private var weekdayString: String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ja_JP")
-        formatter.dateFormat = "EEEE"
-        return formatter.string(from: chore.nextDueDate)
     }
 }
 
 #Preview {
-    List {
+    VStack(spacing: AppTheme.cardSpacing) {
         ChoreRowView(
-            chore: {
-                let chore = ChoreItem(name: "掃除機がけ", frequencyDays: 3)
-                return chore
-            }(),
-            onComplete: {}
+            chore: ChoreItem(name: "掃除機がけ", frequencyDays: 3),
+            onComplete: {},
+            onPostpone: {}
         )
-
         ChoreRowView(
             chore: {
                 let chore = ChoreItem(name: "洗濯", frequencyDays: 2)
+                chore.nextDueDate = Calendar.current.date(byAdding: .day, value: -2, to: Date())!
                 return chore
             }(),
-            onComplete: {}
+            onComplete: {},
+            onPostpone: {}
         )
     }
+    .padding()
+    .background(AppTheme.backgroundMint)
 }

@@ -84,6 +84,7 @@ struct EditChoreView: View {
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
+            .tint(AppTheme.primaryMint)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {
@@ -113,7 +114,8 @@ struct EditChoreView: View {
                 .fontWeight(.medium)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
-                .background(Color.secondary.opacity(0.1))
+                .foregroundStyle(AppTheme.accentTeal)
+                .background(AppTheme.primaryMint.opacity(0.1))
                 .clipShape(Capsule())
         }
         .buttonStyle(.plain)

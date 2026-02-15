@@ -39,7 +39,9 @@ struct CalendarView: View {
                 selectedDateChoreList
             }
             .navigationTitle("カレンダー")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .sheet(item: $selectedChore) { chore in
                 EditChoreView(chore: chore)
             }

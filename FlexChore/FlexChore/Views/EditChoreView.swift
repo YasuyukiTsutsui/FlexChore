@@ -81,7 +81,9 @@ struct EditChoreView: View {
                 }
             }
             .navigationTitle("家事を編集")
+            #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
+            #endif
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("キャンセル") {

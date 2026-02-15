@@ -10,23 +10,35 @@ import SwiftData
 
 @main
 struct FlexChoreApp: App {
-    var sharedModelContainer: ModelContainer = {
+    let sharedModelContainer: ModelContainer
+
+    init() {
         let schema = Schema([
             ChoreItem.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
         do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
+            sharedModelContainer = try ModelContainer(for: schema, configurations: [modelConfiguration])
         } catch {
             fatalError("Could not create ModelContainer: \(error)")
         }
-    }()
+    }
 
     var body: some Scene {
         WindowGroup {
             ChoreListView()
+                .task {
+                    await initializeApp()
+                }
         }
         .modelContainer(sharedModelContainer)
+    }
+
+    /// アプリ起動時の初期化処理
+    @MainActor
+    private func initializeApp() async {
+        let initializer = AppInitializer(modelContainer: sharedModelContainer)
+        await initializer.initialize()
     }
 }

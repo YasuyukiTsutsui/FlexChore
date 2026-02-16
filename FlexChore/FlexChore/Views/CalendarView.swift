@@ -74,6 +74,7 @@ struct CalendarView: View {
             Text(currentMonth, format: .dateTime.year().month())
                 .font(.title2)
                 .fontWeight(.semibold)
+                .foregroundStyle(.black)
 
             Spacer()
 
@@ -96,8 +97,9 @@ struct CalendarView: View {
                 Text(symbol)
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.black)
                     .frame(maxWidth: .infinity)
+
             }
         }
         .padding(.horizontal)
@@ -140,7 +142,7 @@ struct CalendarView: View {
                 Text("\(calendar.component(.day, from: date))")
                     .font(.subheadline)
                     .fontWeight(isToday ? .bold : .regular)
-                    .foregroundStyle(isToday ? .white : .primary)
+                    .foregroundStyle(isToday ? .white : .black)
                     .frame(width: 28, height: 28)
                     .background {
                         if isToday {
@@ -159,6 +161,7 @@ struct CalendarView: View {
                             .padding(.horizontal, 2)
                             .padding(.vertical, 1)
                             .frame(maxWidth: .infinity)
+                            .foregroundStyle(.black)
                             .background(
                                 RoundedRectangle(cornerRadius: 2)
                                     .fill(choreColor(for: chore, on: date).opacity(0.3))
@@ -184,21 +187,23 @@ struct CalendarView: View {
 
         return VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text(selectedDate, format: .dateTime.month().day().weekday())
+                Text("今日やる家事")
                     .font(.headline)
+                    .foregroundStyle(.white)
 
                 Spacer()
 
                 Text("\(choresOnDay.count)件")
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.white)
             }
             .padding(.horizontal)
             .padding(.top, 12)
+            .padding(.bottom, 12)
+            .background(AppTheme.primaryMint)
 
             if choresOnDay.isEmpty {
                 Text("この日の予定はありません")
-                    .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             } else {
                 List {
@@ -210,23 +215,28 @@ struct CalendarView: View {
 
                             Text(chore.name)
                                 .font(.body)
+                                .foregroundStyle(.black)
 
                             Spacer()
 
                             Text("\(chore.frequencyDays)日ごと")
                                 .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .foregroundStyle(.black)
                         }
                         .contentShape(Rectangle())
                         .onTapGesture {
                             selectedChore = chore
                         }
+                        .listRowBackground(AppTheme.backgroundMint)
                     }
                 }
                 .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .background(.white)
             }
         }
         .frame(maxHeight: .infinity)
+        .background(.white)
     }
 
     // MARK: - Helper Methods
@@ -287,6 +297,26 @@ struct CalendarView: View {
 }
 
 #Preview {
-    CalendarView()
-        .modelContainer(for: ChoreItem.self, inMemory: true)
+    // 1. プレビュー用のコンテナを作成
+    let config = ModelConfiguration(isStoredInMemoryOnly: true)
+    let container = try! ModelContainer(for: ChoreItem.self, configurations: config)
+
+    // 2. サンプルデータの追加
+    let today = Date()
+    let calendar = Calendar.current
+    
+    let samples = [
+        ChoreItem(name: "トイレ掃除", frequencyDays: 7, nextDueDate: today),
+        ChoreItem(name: "ゴミ出し", frequencyDays: 3, nextDueDate: today),
+        ChoreItem(name: "お風呂掃除", frequencyDays: 1, nextDueDate: calendar.date(byAdding: .day, value: 1, to: today)!),
+        ChoreItem(name: "洗濯", frequencyDays: 2, nextDueDate: calendar.date(byAdding: .day, value: -2, to: today)!), // 期限切れ
+        ChoreItem(name: "買い出し", frequencyDays: 14, nextDueDate: calendar.date(byAdding: .day, value: 3, to: today)!)
+    ]
+    
+    for sample in samples {
+        container.mainContext.insert(sample)
+    }
+
+    return CalendarView()
+        .modelContainer(container)
 }

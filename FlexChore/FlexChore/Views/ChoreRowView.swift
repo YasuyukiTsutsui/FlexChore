@@ -31,10 +31,11 @@ struct ChoreRowView: View {
                     .font(.headline)
                     .fontWeight(.bold)
                     .lineLimit(2)
+                    .foregroundStyle(.black)
 
                 Text(chore.statusDescription)
                     .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.gray)
             }
 
             Spacer()

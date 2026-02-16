@@ -138,9 +138,10 @@ struct ChoreListView: View {
             Text("家事がありません")
                 .font(.title3)
                 .fontWeight(.medium)
+                .foregroundStyle(.black)
             Text("下の + ボタンから家事を追加してください")
                 .font(.body)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.gray)
                 .multilineTextAlignment(.center)
         }
         .padding(40)
